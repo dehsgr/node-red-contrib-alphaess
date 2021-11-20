@@ -1,0 +1,60 @@
+<script type="text/javascript">
+	RED.nodes.registerType('alphaess-monitoring', {
+		category: 'Alpha ESS',
+		defaults: {	
+			name: { value: ''},
+			username:  { value: '', required: true },
+			password:  { value: '', required: true },
+			serial: { value: '', required: true },
+			interval: {
+				value: '5',
+				required: true,
+				validate: function (myValue) {
+                    return RED.validators.number(myValue) && myValue >= 5;
+				}
+			}
+		},
+		credentials: {
+			username: {type: "text"},
+			password: {type: "password"},
+			serial: {type: "text"}
+		},
+		inputs: 0,			// set the number of inputs - only 0 or 1
+		outputs: 1,			// set the number of outputs - 0 to n
+		icon: "icon.png",		// saved in  icons/myicon.png
+		color: "#757c8a", 
+		label: function() {
+			return this.name || "Alpha ESS Monitoring";
+		},
+		paletteLabel: "Monitoring"
+	});
+</script>
+
+<!-- Setting design and inputs for node -->
+<script type="text/x-red" data-template-name="alphaess-monitoring">
+	<div class="form-row">
+		<label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+		<input type="text" id="node-input-name" placeholder="e.g. Alpha ESS Monitoring">
+	</div>	
+	<div class="form-row">
+		<label for="node-input-username"><i class="fa fa-tag"></i> Username</label>
+		<input type="text" id="node-input-username" placeholder="e.g. myalphaessuserid">
+	</div>	
+	<div class="form-row">
+		<label for="node-input-password"><i class="fa fa-tag"></i> Password</label>
+		<input type="password" id="node-input-password" placeholder="e.g. myspecialsecret">
+	</div>	
+	<div class="form-row">
+		<label for="node-input-serial"><i class="fa fa-tag"></i> Serial</label>
+		<input type="text" id="node-input-serial" placeholder="e.g. ABCDEF012345678">
+	</div>	
+	<div class="form-row">
+		<label for="node-input-interval"><i class="fa fa-tag"></i> Interval</label>
+		<input type="text" id="node-input-interval" placeholder="5 is a good default value!">
+	</div>	
+</script>
+
+<!-- Simple Help Text -->
+<script type="text/x-red" data-help-name="alphaess-monitoring">
+	<p>A node to retrieve realtime information from Alpha ESS photovoltaic system.</p>
+</script>

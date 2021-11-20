@@ -1,0 +1,24 @@
+{
+	"name": "node-red-contrib-alphaess",
+	"version": "1.0.0",
+	"description": "This provides a node for retrieving realtime information from Alpha ESS photovoltaic systems.",
+	"author": "d3h56r",
+	"license": "ISC",
+	"keywords": [
+		"node-red",
+		"Alpha ESS",
+		"Storion"
+	],
+	"node-red": {
+		"nodes": {
+			"alphaess-monitoring": "alphaess-monitoring.js"
+		}
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/dehsgr/node-red-contrib-alphaess.git"
+	},
+	"dependencies": {
+		"request": "^2.75.0"
+	}
+}
