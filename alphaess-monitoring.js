@@ -1,6 +1,7 @@
 // ~~~ constants ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-module.exports = function(RED) {
+module.exports = function(RED)
+{
 	'use strict';
 
 	// ~~~ constructor / destructor ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -18,11 +19,26 @@ module.exports = function(RED) {
 		this.Password = myNode.password;
 		this.Interval = parseInt(myNode.interval);
 		this.BaseURI = 'https://www.alphaess.com/api/';
+		this.Cache = {
+			'Daily' : {
+				'LastQuery': 0,
+				'Statistics': undefined
+			}
+		};
+
+		Object.defineProperty(this.Cache, "Index", { get: function () { 
+			return new Date().getDate() - 1;
+		}});
+
+		Object.defineProperty(this.Cache, "Date", { get: function () { 
+			var now = new Date();
+			return now.getFullYear() + '-' + (now.getMonth() + 1) + '-' + now.getDate();
+		}});
 
 		function monitor()
 		{
 			Platform.login();
-			Platform.fetchData();
+			Platform.fetchRealtime();
 		}
 
 		monitor();
@@ -31,7 +47,7 @@ module.exports = function(RED) {
 			monitor();
 		}, Platform.Interval * 1000);   // trigger every defined secs
 
-		Platform.on("close", function() {
+		Platform.on('close', function() {
 			if (Loop) {
 				clearInterval(Loop);
 			}
@@ -89,9 +105,12 @@ module.exports = function(RED) {
 			},
 			body: JSON.stringify(LoginData)
 		}, function(myError, myResponse) {
-			if(myError) {
+			if(myError)
+			{
 				Platform.warn('There was an error during login operation into Alpha ESS monitoring portal: ' + myError);
-			} else {
+			}
+			else
+			{
 				var body = JSON.parse(myResponse.body);
 				Platform.Auth = {
 					'Token': body.data.AccessToken,
@@ -102,7 +121,8 @@ module.exports = function(RED) {
 		});
 	}
 
-	AlphaESS.prototype.fetchData = function() {
+	AlphaESS.prototype.fetchRealtime = function()
+	{
 		var Platform = this;
 
 		if (!Platform.Auth || !Platform.Auth.Token)
@@ -110,7 +130,7 @@ module.exports = function(RED) {
 			return;
 		}
 		
-		Platform.log('Fetching monitoring data...');
+		Platform.log('Fetching realtime data...');
 
 		require('request')({
 			method: 'GET',
@@ -124,10 +144,27 @@ module.exports = function(RED) {
 				'Authorization': 'Bearer ' + Platform.Auth.Token
 			}
 		}, function(myError, myResponse) {
-			if(myError) {
-				Platform.warn('There was an error fetching monitoring data for ' + Platform.Serial + ': ' + myError);
-			} else {
+			if(myError)
+			{
+				Platform.warn('There was an error fetching realtime data for ' + Platform.Serial + ': ' + myError);
+			}
+			else
+			{
 				var body = JSON.parse(myResponse.body);
+				var today = new Date();
+				today = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
+
+				// let's fetch daily statistics every 5 minutes...
+				if (Date.now() > Platform.Cache.Daily.LastQuery + (1000 * 60 * 5)) {
+					Platform.fetchStatistics();
+				}
+
+				// don't send any data until caches have been populated...
+				if (!Platform.Cache.Daily.LastQuery)
+				{
+					return;
+				}
+
 				Platform.send({ 
 					'code': body.code,
 					'info': body.info,
@@ -144,9 +181,71 @@ module.exports = function(RED) {
 							'soc': body.data.soc,
 							'load': body.data.pbat
 						},
-						'rawdata': body.data
+						'today': {
+							'consumption':
+								Platform.Cache.Daily.Statistics.Eloads[Platform.Cache.Index],
+							'grid': {
+								'supply': Platform.Cache.Daily.Statistics.Eoutputs[Platform.Cache.Index],
+								'purchase': Platform.Cache.Daily.Statistics.Einputs[Platform.Cache.Index]
+							},
+							'modules':
+								Platform.Cache.Daily.Statistics.Epvs[Platform.Cache.Index],
+							'battery': {
+								'charge': Platform.Cache.Daily.Statistics.ECharge[Platform.Cache.Index],
+								'discharge': Platform.Cache.Daily.Statistics.EDischarge[Platform.Cache.Index]
+							}
+						},
+						'rawdata': {
+							'realtime': body.data,
+							'today': Platform.Cache.Daily.Statistics
+						}
 					}
 				});
+			}
+		});
+	}
+
+	AlphaESS.prototype.fetchStatistics = function()
+	{
+		var Platform = this;
+
+		if (!Platform.Auth || !Platform.Auth.Token)
+		{
+			return;
+		}
+
+		Platform.log('Fetching statistics...');
+
+		require('request')({
+			method: 'POST',
+			url: Platform.BaseURI + 'Statistic/SystemStatistic',
+			headers: {
+				'Content-Type': 'application/json',
+				'Connection': 'keep-alive',
+				'Accept': '*/*',
+				'Accept-Encoding': 'gzip, deflate',
+				'Cache-Control': 'no-cache',
+				'Authorization': 'Bearer ' + Platform.Auth.Token
+			},
+			body: JSON.stringify({
+				'statisticBy': 'month',
+				'sDate': Platform.Cache.Date,
+				'isOEM': 0,
+				'sn': Platform.Serial,
+				'userId': '',
+			})
+		}, function(myError, myResponse) {
+			if(myError)
+			{
+				Platform.warn('There was an error fetching statistics for ' + Platform.Serial + ': ' + myError);
+			}
+			else
+			{
+				var body = JSON.parse(myResponse.body);
+				Platform.Cache.Daily = {
+					'LastQuery': Date.now(),
+					'Statistics': body.data
+				}
 			}
 		});
 	}
