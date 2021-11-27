@@ -54,7 +54,13 @@ module.exports = function(RED)
 		});
 	}
 
-	RED.nodes.registerType('alphaess-monitoring', AlphaESS);
+	RED.nodes.registerType('alphaess-monitoring', AlphaESS, {
+		credentials: {
+			username: {type: "text"},
+			password: {type: "password"},
+			serial: {type: "text"}
+		}
+	});
 
 	// ~~~ functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
