@@ -203,7 +203,7 @@ module.exports = function(RED)
 						},
 						'rawdata': {
 							'realtime': body.data,
-							'today': Platform.Cache.Daily.Statistics
+							'statistics': Platform.Cache.Daily.Statistics
 						}
 					}
 				});
