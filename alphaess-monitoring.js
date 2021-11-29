@@ -120,7 +120,9 @@ module.exports = function(RED)
 				var body = JSON.parse(myResponse.body);
 				Platform.Auth = {
 					'Token': body.data.AccessToken,
-					'Expires': body.data.ExpiresIn + Date.now(),
+					'Expires': Date.now() + (
+						(body.data.ExpiresIn - 3600) * 1000		// ExpiresIn are returned in secs!
+					),
 					'RefreshKey': body.data.RefreshTokenKey
 				};
 			}
@@ -136,7 +138,7 @@ module.exports = function(RED)
 			return;
 		}
 		
-		Platform.log('Fetching realtime data...');
+		Platform.debug('Fetching realtime data...');
 
 		require('request')({
 			method: 'GET',
@@ -220,7 +222,7 @@ module.exports = function(RED)
 			return;
 		}
 
-		Platform.log('Fetching statistics...');
+		Platform.debug('Fetching statistics...');
 
 		require('request')({
 			method: 'POST',
