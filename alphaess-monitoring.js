@@ -23,7 +23,11 @@ module.exports = function(RED)
 			'Daily' : {
 				'LastQuery': 0,
 				'Statistics': undefined
-			}
+			},
+			'Monthly' : {
+				'LastQuery': 0,
+				'Statistics': undefined
+			},
 		};
 
 		Object.defineProperty(this.Cache, "Index", { get: function () { 
@@ -159,16 +163,19 @@ module.exports = function(RED)
 			else
 			{
 				var body = JSON.parse(myResponse.body);
-				var today = new Date();
-				today = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
 
 				// let's fetch daily statistics every 5 minutes...
 				if (Date.now() > Platform.Cache.Daily.LastQuery + (1000 * 60 * 5)) {
-					Platform.fetchStatistics();
+					Platform.fetchDailyStatistics();
+				}
+
+				// let's fetch monthly statistics every hour...
+				if (Date.now() > Platform.Cache.Daily.LastQuery + (1000 * 60 * 60)) {
+					Platform.fetchMonthlyStatistics();
 				}
 
 				// don't send any data until caches have been populated...
-				if (!Platform.Cache.Daily.LastQuery)
+				if (!Platform.Cache.Daily.LastQuery || !Platform.Cache.Monthly.LastQuery)
 				{
 					return;
 				}
@@ -205,7 +212,10 @@ module.exports = function(RED)
 						},
 						'rawdata': {
 							'realtime': body.data,
-							'statistics': Platform.Cache.Daily.Statistics
+							'statistics': {
+								'daily': Platform.Cache.Daily.Statistics,
+								'monthly': Platform.Cache.Monthly.Statistics
+							}
 						}
 					}
 				});
@@ -213,7 +223,7 @@ module.exports = function(RED)
 		});
 	}
 
-	AlphaESS.prototype.fetchStatistics = function()
+	AlphaESS.prototype.fetchDailyStatistics = function()
 	{
 		var Platform = this;
 
@@ -222,7 +232,7 @@ module.exports = function(RED)
 			return;
 		}
 
-		Platform.debug('Fetching statistics...');
+		Platform.debug('Fetching daily statistics...');
 
 		require('request')({
 			method: 'POST',
@@ -245,12 +255,57 @@ module.exports = function(RED)
 		}, function(myError, myResponse) {
 			if(myError)
 			{
-				Platform.warn('There was an error fetching statistics for ' + Platform.Serial + ': ' + myError);
+				Platform.warn('There was an error fetching daily statistics for ' + Platform.Serial + ': ' + myError);
 			}
 			else
 			{
 				var body = JSON.parse(myResponse.body);
 				Platform.Cache.Daily = {
+					'LastQuery': Date.now(),
+					'Statistics': body.data
+				}
+			}
+		});
+	}
+
+	AlphaESS.prototype.fetchMonthlyStatistics = function()
+	{
+		var Platform = this;
+
+		if (!Platform.Auth || !Platform.Auth.Token)
+		{
+			return;
+		}
+
+		Platform.debug('Fetching monthly statistics...');
+
+		require('request')({
+			method: 'POST',
+			url: Platform.BaseURI + 'Statistic/SystemStatistic',
+			headers: {
+				'Content-Type': 'application/json',
+				'Connection': 'keep-alive',
+				'Accept': '*/*',
+				'Accept-Encoding': 'gzip, deflate',
+				'Cache-Control': 'no-cache',
+				'Authorization': 'Bearer ' + Platform.Auth.Token
+			},
+			body: JSON.stringify({
+				'statisticBy': 'year',
+				'sDate': Platform.Cache.Date,
+				'isOEM': 0,
+				'sn': Platform.Serial,
+				'userId': '',
+			})
+		}, function(myError, myResponse) {
+			if(myError)
+			{
+				Platform.warn('There was an error fetching monthly statistics for ' + Platform.Serial + ': ' + myError);
+			}
+			else
+			{
+				var body = JSON.parse(myResponse.body);
+				Platform.Cache.Monthly = {
 					'LastQuery': Date.now(),
 					'Statistics': body.data
 				}
