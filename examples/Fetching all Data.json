@@ -1,0 +1,44 @@
+[
+	{
+		"id": "078332d584aa509a",
+		"type": "tab",
+		"label": "Alpha ESS",
+		"disabled": false,
+		"info": "",
+		"env": []
+	},
+	{
+		"id": "280ecf7dc5796624",
+		"type": "alphaess-monitoring",
+		"z": "078332d584aa509a",
+		"name": "Alpha ESS Monitoring",
+		"username": "myalphaessuserid",
+		"password": "myspecialsecret",
+		"serial": "ABCDEF012345678",
+		"interval": "5",
+		"x": 120,
+		"y": 40,
+		"wires": [
+			[
+				"ea94a637bf83e228"
+			]
+		]
+	},
+	{
+		"id": "ea94a637bf83e228",
+		"type": "debug",
+		"z": "078332d584aa509a",
+		"name": "Output all data to debug console...",
+		"active": true,
+		"tosidebar": true,
+		"console": false,
+		"tostatus": false,
+		"complete": "payload",
+		"targetType": "msg",
+		"statusVal": "",
+		"statusType": "auto",
+		"x": 380,
+		"y": 40,
+		"wires": []
+	}
+]

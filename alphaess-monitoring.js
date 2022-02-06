@@ -122,13 +122,20 @@ module.exports = function(RED)
 			else
 			{
 				var body = JSON.parse(myResponse.body);
-				Platform.Auth = {
-					'Token': body.data.AccessToken,
-					'Expires': Date.now() + (
-						(body.data.ExpiresIn - 3600) * 1000		// ExpiresIn are returned in secs!
-					),
-					'RefreshKey': body.data.RefreshTokenKey
-				};
+				try
+				{
+					Platform.Auth = {
+						'Token': body.data.AccessToken,
+						'Expires': Date.now() + (
+							(body.data.ExpiresIn - 3600) * 1000		// ExpiresIn are returned in secs!
+						),
+						'RefreshKey': body.data.RefreshTokenKey
+					};
+				}
+				catch(myError)
+				{
+					Platform.warn('There was an error during login operation into Alpha ESS monitoring portal: ' + myError + '\r\n\r\nWe got the following unprocessable body:\r\n' + myResponse.body);
+				}
 			}
 		});
 	}
