@@ -192,13 +192,13 @@ module.exports = function(RED)
 					'info': body.info,
 					'payload': {
 						'consumption': 
-							body.data.pmeter_l1 + body.data.pmeter_l2 + body.data.pmeter_l3 + 
-							body.data.ppv1 + body.data.ppv2 + body.data.ppv3 + body.data.ppv4 +
-							body.data.pbat,
+							(body.data.pmeter_l1 || 0) + (body.data.pmeter_l2 || 0) + (body.data.pmeter_l3 || 0) + 
+							(body.data.ppv1 || 0) + (body.data.ppv2 || 0) + (body.data.ppv3 || 0) + (body.data.ppv4 || 0) +
+							(body.data.pbat || 0),
 						'grid':
-							body.data.pmeter_l1 + body.data.pmeter_l2 + body.data.pmeter_l3,
+							(body.data.pmeter_l1 || 0) + (body.data.pmeter_l2 || 0) + (body.data.pmeter_l3 || 0),
 						'modules':
-							body.data.ppv1 + body.data.ppv2 + body.data.ppv3 + body.data.ppv4,
+							(body.data.ppv1 || 0) + (body.data.ppv2 || 0) + (body.data.ppv3 || 0) + (body.data.ppv4 || 0),
 						'battery': {
 							'soc': body.data.soc,
 							'load': body.data.pbat
