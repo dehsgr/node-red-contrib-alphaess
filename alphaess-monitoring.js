@@ -170,6 +170,15 @@ module.exports = function(RED)
 			else
 			{
 				var body = JSON.parse(myResponse.body);
+				try {
+					var check = (body.data.pmeter_l1 || 0) + (body.data.pmeter_l2 || 0) + (body.data.pmeter_l3 || 0) + 
+								(body.data.ppv1 || 0) + (body.data.ppv2 || 0) + (body.data.ppv3 || 0) + (body.data.ppv4 || 0) +
+								(body.data.pbat || 0);
+				}
+				catch(myError)
+				{
+					Platform.warn('There was an error parsing response. We got the following data:\r\n\r\n' +  myResponse.body);
+				}
 
 				// let's fetch daily statistics every 5 minutes...
 				if (Date.now() > Platform.Cache.Daily.LastQuery + (1000 * 60 * 5)) {
