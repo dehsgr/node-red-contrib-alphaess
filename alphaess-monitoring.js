@@ -20,6 +20,10 @@ module.exports = function(RED)
 		this.Interval = parseInt(myNode.interval);
 		this.BaseURI = 'https://www.alphaess.com/api/';
 		this.Cache = {
+			'Hourly' : {
+				'LastQuery': 0,
+				'Statistics': undefined
+			},
 			'Daily' : {
 				'LastQuery': 0,
 				'Statistics': undefined
@@ -179,8 +183,13 @@ module.exports = function(RED)
 					}
 				}
 
-				// let's fetch daily statistics every 5 minutes...
-				if (Date.now() > Platform.Cache.Daily.LastQuery + (1000 * 60 * 5)) {
+				// let's fetch hourly statistics every 10 minutes...
+				if (Date.now() > Platform.Cache.Daily.LastQuery + (1000 * 60 * 10)) {
+					Platform.fetchHourlyStatistics();
+				}
+
+				// let's fetch daily statistics every 10 minutes...
+				if (Date.now() > Platform.Cache.Daily.LastQuery + (1000 * 60 * 10)) {
 					Platform.fetchDailyStatistics();
 				}
 
@@ -190,7 +199,7 @@ module.exports = function(RED)
 				}
 
 				// don't send any data until caches have been populated...
-				if (!Platform.Cache.Daily.LastQuery || !Platform.Cache.Monthly.LastQuery)
+				if (!Platform.Cache.Hourly.LastQuery || !Platform.Cache.Daily.LastQuery || !Platform.Cache.Monthly.LastQuery)
 				{
 					return;
 				}
@@ -228,12 +237,58 @@ module.exports = function(RED)
 						'rawdata': {
 							'realtime': body.data,
 							'statistics': {
+								'hourly': Platform.Cache.Hourly.Statistics,
 								'daily': Platform.Cache.Daily.Statistics,
 								'monthly': Platform.Cache.Monthly.Statistics
 							}
 						}
 					}
 				});
+			}
+		});
+	}
+
+	AlphaESS.prototype.fetchHourlyStatistics = function()
+	{
+		var Platform = this;
+
+		if (!Platform.Auth || !Platform.Auth.Token)
+		{
+			return;
+		}
+
+		Platform.debug('Fetching hourly statistics...');
+
+		require('request')({
+			method: 'POST',
+			url: Platform.BaseURI + 'Power/SticsByDay',
+			headers: {
+				'Content-Type': 'application/json',
+				'Connection': 'keep-alive',
+				'Accept': '*/*',
+				'Accept-Encoding': 'gzip, deflate',
+				'Cache-Control': 'no-cache',
+				'Authorization': 'Bearer ' + Platform.Auth.Token
+			},
+			body: JSON.stringify({
+				'szDay': Platform.Cache.Date,
+				'sDate': Platform.Cache.Date,
+				'isOEM': 0,
+				'sn': Platform.Serial,
+				'userId': Platform.Serial,
+			})
+		}, function(myError, myResponse) {
+			if(myError)
+			{
+				Platform.warn('There was an error fetching hourly statistics for ' + Platform.Serial + ': ' + myError);
+			}
+			else
+			{
+				var body = JSON.parse(myResponse.body);
+				Platform.Cache.Hourly = {
+					'LastQuery': Date.now(),
+					'Statistics': body.data
+				}
 			}
 		});
 	}

@@ -5,6 +5,6 @@ This provides a node for retrieving realtime data and statistical data from Alph
 ## Alpha ESS Monitoring
 Alpha ESS Monitoring periodically polls the realtime data from Alpha ESS Monitoring servers. The interval in seconds can be set. It returns consumption, grid power, modules power, battery power, battery soc and addionally all realtime data in raw format.
 
-Additionally Alpha ESS Monitoring polls statistical data on startup and every 5 minutes. It returns daily consumption, daily grid supply, daily grid purchase, daily modules yield, daily battery (dis)charge and additionally all statistical data in raw format.
+Additionally Alpha ESS Monitoring polls statistical data on startup and every 10 minutes. It returns daily consumption, daily grid supply, daily grid purchase, daily modules yield, daily battery (dis)charge and additionally all statistical data in raw format.
 
 All data are merged together into one payload.
