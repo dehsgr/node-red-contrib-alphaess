@@ -177,7 +177,7 @@ module.exports = function(RED)
 				if (body.data === null) {
 					Platform.warn('There was an error fetching realtime data for ' + Platform.Serial + ': Empty response!');
 					body.data = {
-						pmeter_l1: 0, pmeter_l2: 0, pmeter_l3: 0,
+						pmeter_l1: 0, pmeter_l2: 0, pmeter_l3: 0, pmeter_dc: 0,
 						ppv1: 0, ppv2: 0, ppv3: 0, ppv4: 0,
 						pbat: 0
 					}
@@ -209,13 +209,13 @@ module.exports = function(RED)
 					'info': body.info,
 					'payload': {
 						'consumption': 
-							body.data.pmeter_l1 + body.data.pmeter_l2 + body.data.pmeter_l3 + 
+							body.data.pmeter_l1 + body.data.pmeter_l2 + body.data.pmeter_l3 + body.data.pmeter_dc + 
 							body.data.ppv1 + body.data.ppv2 + body.data.ppv3 + body.data.ppv4 +
 							body.data.pbat,
 						'grid':
 							body.data.pmeter_l1 + body.data.pmeter_l2 + body.data.pmeter_l3,
 						'modules':
-							body.data.ppv1 + body.data.ppv2 + body.data.ppv3 + body.data.ppv4,
+							body.data.ppv1 + body.data.ppv2 + body.data.ppv3 + body.data.ppv4 + body.data.pmeter_dc,
 						'battery': {
 							'soc': body.data.soc,
 							'load': body.data.pbat
