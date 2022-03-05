@@ -173,9 +173,16 @@ module.exports = function(RED)
 			}
 			else
 			{
-				var body = JSON.parse(myResponse.body);
+				try {
+					var body = JSON.parse(myResponse.body);
+				}
+				catch(myError)
+				{
+					body = { data: null	};
+				}
+
 				if (body.data === null) {
-					Platform.warn('There was an error fetching realtime data for ' + Platform.Serial + ': Empty response!');
+					Platform.warn('There was an error fetching realtime data for ' + Platform.Serial + ': Malformed or empty response!');
 					body.data = {
 						pmeter_l1: 0, pmeter_l2: 0, pmeter_l3: 0, pmeter_dc: 0,
 						ppv1: 0, ppv2: 0, ppv3: 0, ppv4: 0,
