@@ -186,6 +186,7 @@ module.exports = function(RED)
 					if (Platform.UseBackupPath) {
 						Platform.warn('There was an error fetching realtime data for ' + Platform.Serial + '. Switching over to backup path for requesting data...');
 						AlphaESS.prototype.fetchRealtime = AlphaESS.prototype.fetchRealtimeBackupPath;
+						return;
 					} else {
 						Platform.warn('There was an error fetching realtime data for ' + Platform.Serial + ': Malformed or empty response!');
 						body.data = {
@@ -193,10 +194,10 @@ module.exports = function(RED)
 							ppv1: 0, ppv2: 0, ppv3: 0, ppv4: 0,
 							pbat: 0
 						}
-
-						Platform.processData(body);
 					}
 				}
+
+				Platform.processData(body);
 			}
 		});
 	}
