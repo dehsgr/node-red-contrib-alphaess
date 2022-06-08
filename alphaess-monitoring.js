@@ -182,6 +182,59 @@ module.exports = function(RED)
 				}
 
 				if (body.data === null) {
+					Platform.warn('There was an error fetching realtime data for ' + Platform.Serial + '. Switching over to backup path for requesting data...');
+					AlphaESS.prototype.fetchRealtime = AlphaESS.prototype.fetchRealtimeBackupPath;
+				}
+				else
+				{
+					Platform.processData(body);
+				}
+			}
+		});
+	}
+
+	AlphaESS.prototype.fetchRealtimeBackupPath = function()
+	{
+		var Platform = this;
+
+		if (!Platform.Auth || !Platform.Auth.Token)
+		{
+			return;
+		}
+		
+		Platform.debug('Fetching realtime data (backup path)...');
+
+		require('request')({
+			method: 'POST',
+			url: Platform.BaseURI + 'ESS/GetLastPowerDataBySN',
+			headers: {
+				'Content-Type': 'application/json',
+				'Connection': 'keep-alive',
+				'Accept': '*/*',
+				'Accept-Encoding': 'gzip, deflate',
+				'Cache-Control': 'no-cache',
+				'Authorization': 'Bearer ' + Platform.Auth.Token
+			},
+			body: JSON.stringify({
+				'sys_sn': Platform.Serial,
+				'noLoading': true,
+			})
+		}, function(myError, myResponse) {
+			if(myError)
+			{
+				Platform.warn('There was an error fetching realtime data for ' + Platform.Serial + ': ' + myError);
+			}
+			else
+			{
+				try {
+					var body = JSON.parse(myResponse.body);
+				}
+				catch(myError)
+				{
+					body = { data: null	};
+				}
+
+				if (body.data === null) {
 					Platform.warn('There was an error fetching realtime data for ' + Platform.Serial + ': Malformed or empty response!');
 					body.data = {
 						pmeter_l1: 0, pmeter_l2: 0, pmeter_l3: 0, pmeter_dc: 0,
@@ -190,67 +243,7 @@ module.exports = function(RED)
 					}
 				}
 
-				// let's fetch hourly statistics every 10 minutes...
-				if (Date.now() > Platform.Cache.Daily.LastQuery + (1000 * 60 * 10)) {
-					Platform.fetchHourlyStatistics();
-				}
-
-				// let's fetch daily statistics every 10 minutes...
-				if (Date.now() > Platform.Cache.Daily.LastQuery + (1000 * 60 * 10)) {
-					Platform.fetchDailyStatistics();
-				}
-
-				// let's fetch monthly statistics every hour...
-				if (Date.now() > Platform.Cache.Daily.LastQuery + (1000 * 60 * 60)) {
-					Platform.fetchMonthlyStatistics();
-				}
-
-				// don't send any data until caches have been populated...
-				if (!Platform.Cache.Hourly.LastQuery || !Platform.Cache.Daily.LastQuery || !Platform.Cache.Monthly.LastQuery)
-				{
-					return;
-				}
-
-				Platform.send({ 
-					'code': body.code,
-					'info': body.info,
-					'payload': {
-						'consumption': 
-							body.data.pmeter_l1 + body.data.pmeter_l2 + body.data.pmeter_l3 + body.data.pmeter_dc + 
-							body.data.ppv1 + body.data.ppv2 + body.data.ppv3 + body.data.ppv4 +
-							body.data.pbat,
-						'grid':
-							body.data.pmeter_l1 + body.data.pmeter_l2 + body.data.pmeter_l3,
-						'modules':
-							body.data.ppv1 + body.data.ppv2 + body.data.ppv3 + body.data.ppv4 + body.data.pmeter_dc,
-						'battery': {
-							'soc': body.data.soc,
-							'load': body.data.pbat
-						},
-						'today': {
-							'consumption':
-								Platform.Cache.Daily.Statistics.Eloads[Platform.Cache.Index],
-							'grid': {
-								'supply': Platform.Cache.Daily.Statistics.Eoutputs[Platform.Cache.Index],
-								'purchase': Platform.Cache.Daily.Statistics.Einputs[Platform.Cache.Index]
-							},
-							'modules':
-								Platform.Cache.Daily.Statistics.Epvs[Platform.Cache.Index],
-							'battery': {
-								'charge': Platform.Cache.Daily.Statistics.ECharge[Platform.Cache.Index],
-								'discharge': Platform.Cache.Daily.Statistics.EDischarge[Platform.Cache.Index]
-							}
-						},
-						'rawdata': {
-							'realtime': body.data,
-							'statistics': {
-								'hourly': Platform.Cache.Hourly.Statistics,
-								'daily': Platform.Cache.Daily.Statistics,
-								'monthly': Platform.Cache.Monthly.Statistics
-							}
-						}
-					}
-				});
+				Platform.processData(body);
 			}
 		});
 	}
@@ -385,6 +378,74 @@ module.exports = function(RED)
 				Platform.Cache.Monthly = {
 					'LastQuery': Date.now(),
 					'Statistics': body.data
+				}
+			}
+		});
+	}
+
+	AlphaESS.prototype.processData = function(myData) {
+		var Platform = this;
+
+		Platform.debug('Processing data...');
+
+		// let's fetch hourly statistics every 10 minutes...
+		if (Date.now() > Platform.Cache.Daily.LastQuery + (1000 * 60 * 10)) {
+			Platform.fetchHourlyStatistics();
+		}
+
+		// let's fetch daily statistics every 10 minutes...
+		if (Date.now() > Platform.Cache.Daily.LastQuery + (1000 * 60 * 10)) {
+			Platform.fetchDailyStatistics();
+		}
+
+		// let's fetch monthly statistics every hour...
+		if (Date.now() > Platform.Cache.Daily.LastQuery + (1000 * 60 * 60)) {
+			Platform.fetchMonthlyStatistics();
+		}
+
+		// don't send any data until caches have been populated...
+		if (!Platform.Cache.Hourly.LastQuery || !Platform.Cache.Daily.LastQuery || !Platform.Cache.Monthly.LastQuery)
+		{
+			return;
+		}
+
+		Platform.send({ 
+			'code': myData.code,
+			'info': myData.info,
+			'payload': {
+				'consumption': 
+					myData.data.pmeter_l1 + myData.data.pmeter_l2 + myData.data.pmeter_l3 + myData.data.pmeter_dc + 
+					myData.data.ppv1 + myData.data.ppv2 + myData.data.ppv3 + myData.data.ppv4 +
+					myData.data.pbat,
+				'grid':
+					myData.data.pmeter_l1 + myData.data.pmeter_l2 + myData.data.pmeter_l3,
+				'modules':
+					myData.data.ppv1 + myData.data.ppv2 + myData.data.ppv3 + myData.data.ppv4 + myData.data.pmeter_dc,
+				'battery': {
+					'soc': myData.data.soc,
+					'load': myData.data.pbat
+				},
+				'today': {
+					'consumption':
+						Platform.Cache.Daily.Statistics.Eloads[Platform.Cache.Index],
+					'grid': {
+						'supply': Platform.Cache.Daily.Statistics.Eoutputs[Platform.Cache.Index],
+						'purchase': Platform.Cache.Daily.Statistics.Einputs[Platform.Cache.Index]
+					},
+					'modules':
+						Platform.Cache.Daily.Statistics.Epvs[Platform.Cache.Index],
+					'battery': {
+						'charge': Platform.Cache.Daily.Statistics.ECharge[Platform.Cache.Index],
+						'discharge': Platform.Cache.Daily.Statistics.EDischarge[Platform.Cache.Index]
+					}
+				},
+				'rawdata': {
+					'realtime': myData.data,
+					'statistics': {
+						'hourly': Platform.Cache.Hourly.Statistics,
+						'daily': Platform.Cache.Daily.Statistics,
+						'monthly': Platform.Cache.Monthly.Statistics
+					}
 				}
 			}
 		});
