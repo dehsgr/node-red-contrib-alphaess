@@ -12,7 +12,8 @@
 				validate: function (myValue) {
                     return RED.validators.number(myValue) && myValue >= 5;
 				}
-			}
+			},
+			usefetchbackup: { value: '', required: true },
 		},
 		inputs: 0,			// set the number of inputs - only 0 or 1
 		outputs: 1,			// set the number of outputs - 0 to n
@@ -46,6 +47,10 @@
 	<div class="form-row">
 		<label for="node-input-interval"><i class="fa fa-tag"></i> Interval</label>
 		<input type="text" id="node-input-interval" placeholder="5 is a good default value!">
+	</div>	
+	<div class="form-row">
+		<input type="checkbox" id="node-input-usefetchbackup" style="width: auto; margin-bottom: 5px;">
+		<label for="node-input-usefetchbackup"  style="width: auto;">Use backup path for fetching realtime data (older devices).</label>
 	</div>	
 </script>
 

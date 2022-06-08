@@ -18,6 +18,7 @@ module.exports = function(RED)
 		this.Username = myNode.username;
 		this.Password = myNode.password;
 		this.Interval = parseInt(myNode.interval);
+		this.UseBackupPath = myNode.usefetchbackup;
 		this.BaseURI = 'https://www.alphaess.com/api/';
 		this.Cache = {
 			'Hourly' : {
@@ -182,12 +183,19 @@ module.exports = function(RED)
 				}
 
 				if (body.data === null) {
-					Platform.warn('There was an error fetching realtime data for ' + Platform.Serial + '. Switching over to backup path for requesting data...');
-					AlphaESS.prototype.fetchRealtime = AlphaESS.prototype.fetchRealtimeBackupPath;
-				}
-				else
-				{
-					Platform.processData(body);
+					if (Platform.UseBackupPath) {
+						Platform.warn('There was an error fetching realtime data for ' + Platform.Serial + '. Switching over to backup path for requesting data...');
+						AlphaESS.prototype.fetchRealtime = AlphaESS.prototype.fetchRealtimeBackupPath;
+					} else {
+						Platform.warn('There was an error fetching realtime data for ' + Platform.Serial + ': Malformed or empty response!');
+						body.data = {
+							pmeter_l1: 0, pmeter_l2: 0, pmeter_l3: 0, pmeter_dc: 0,
+							ppv1: 0, ppv2: 0, ppv3: 0, ppv4: 0,
+							pbat: 0
+						}
+
+						Platform.processData(body);
+					}
 				}
 			}
 		});
