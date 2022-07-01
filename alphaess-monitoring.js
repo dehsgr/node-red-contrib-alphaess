@@ -126,9 +126,10 @@ module.exports = function(RED)
 			}
 			else
 			{
-				var body = JSON.parse(myResponse.body);
 				try
 				{
+					var body = JSON.parse(myResponse.body);
+
 					Platform.Auth = {
 						'Token': body.data.AccessToken,
 						'Expires': Date.now() + (
