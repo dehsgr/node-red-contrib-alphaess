@@ -294,11 +294,14 @@ module.exports = function(RED)
 			}
 			else
 			{
-				var body = JSON.parse(myResponse.body);
-				Platform.Cache.Hourly = {
-					'LastQuery': Date.now(),
-					'Statistics': body.data
+				try {
+					var body = JSON.parse(myResponse.body);
+					Platform.Cache.Hourly = {
+						'LastQuery': Date.now(),
+						'Statistics': body.data
+					}
 				}
+				catch(myError) { }
 			}
 		});
 	}
@@ -339,11 +342,14 @@ module.exports = function(RED)
 			}
 			else
 			{
-				var body = JSON.parse(myResponse.body);
-				Platform.Cache.Daily = {
-					'LastQuery': Date.now(),
-					'Statistics': body.data
+				try {
+					var body = JSON.parse(myResponse.body);
+					Platform.Cache.Daily = {
+						'LastQuery': Date.now(),
+						'Statistics': body.data
+					}
 				}
+				catch(myError) { }
 			}
 		});
 	}
@@ -384,11 +390,14 @@ module.exports = function(RED)
 			}
 			else
 			{
-				var body = JSON.parse(myResponse.body);
-				Platform.Cache.Monthly = {
-					'LastQuery': Date.now(),
-					'Statistics': body.data
+				try {
+					var body = JSON.parse(myResponse.body);
+					Platform.Cache.Monthly = {
+						'LastQuery': Date.now(),
+						'Statistics': body.data
+					}
 				}
+				catch(myError) { }
 			}
 		});
 	}
