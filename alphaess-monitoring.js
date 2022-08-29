@@ -129,6 +129,12 @@ module.exports = function(RED)
 				try
 				{
 					var body = JSON.parse(myResponse.body);
+					if (body.code === 102) {						// token is expired 
+						Platform.Auth.RefreshKey = undefined;
+						Platform.warn('Refresh Key expired. We login again now...');
+						Platform.login();
+						return;
+					}
 
 					Platform.Auth = {
 						'Token': body.data.AccessToken,
