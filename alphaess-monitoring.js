@@ -170,7 +170,7 @@ module.exports = function(RED)
 				'Content-Type': 'application/json',
 				'Connection': 'keep-alive',
 				'Accept': '*/*',
-				'Accept-Encoding': 'gzip, deflate',
+				//'Accept-Encoding': 'gzip, deflate',
 				'Cache-Control': 'no-cache',
 				'Authorization': 'Bearer ' + Platform.Auth.Token
 			}
@@ -227,7 +227,7 @@ module.exports = function(RED)
 				'Content-Type': 'application/json',
 				'Connection': 'keep-alive',
 				'Accept': '*/*',
-				'Accept-Encoding': 'gzip, deflate',
+				//'Accept-Encoding': 'gzip, deflate',
 				'Cache-Control': 'no-cache',
 				'Authorization': 'Bearer ' + Platform.Auth.Token
 			},
@@ -282,7 +282,7 @@ module.exports = function(RED)
 				'Content-Type': 'application/json',
 				'Connection': 'keep-alive',
 				'Accept': '*/*',
-				'Accept-Encoding': 'gzip, deflate',
+				//'Accept-Encoding': 'gzip, deflate',
 				'Cache-Control': 'no-cache',
 				'Authorization': 'Bearer ' + Platform.Auth.Token
 			},
@@ -330,7 +330,7 @@ module.exports = function(RED)
 				'Content-Type': 'application/json',
 				'Connection': 'keep-alive',
 				'Accept': '*/*',
-				'Accept-Encoding': 'gzip, deflate',
+				//'Accept-Encoding': 'gzip, deflate',
 				'Cache-Control': 'no-cache',
 				'Authorization': 'Bearer ' + Platform.Auth.Token
 			},
@@ -378,7 +378,7 @@ module.exports = function(RED)
 				'Content-Type': 'application/json',
 				'Connection': 'keep-alive',
 				'Accept': '*/*',
-				'Accept-Encoding': 'gzip, deflate',
+				//'Accept-Encoding': 'gzip, deflate',
 				'Cache-Control': 'no-cache',
 				'Authorization': 'Bearer ' + Platform.Auth.Token
 			},
