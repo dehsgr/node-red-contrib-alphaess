@@ -105,6 +105,7 @@ module.exports = function(RED)
 		);
 
 		require('request')({
+			gzip: true,
 			method: 'POST',
 			url: Platform.BaseURI + (
 				LoginData.refreshTokenKey === undefined ?
@@ -115,7 +116,7 @@ module.exports = function(RED)
 				'Content-Type': 'application/json',
 				'Connection': 'keep-alive',
 				'Accept': '*/*',
-				//'Accept-Encoding': 'gzip, deflate',
+				'Accept-Encoding': 'gzip, deflate',
 				'Cache-Control': 'no-cache'
 			},
 			body: JSON.stringify(LoginData)
@@ -164,13 +165,14 @@ module.exports = function(RED)
 		Platform.debug('Fetching realtime data...');
 
 		require('request')({
+			gzip: true,
 			method: 'GET',
 			url: Platform.BaseURI + 'ESS/GetSecondDataBySn?sys_sn=' + Platform.Serial + '&noLoading=true',
 			headers: {
 				'Content-Type': 'application/json',
 				'Connection': 'keep-alive',
 				'Accept': '*/*',
-				//'Accept-Encoding': 'gzip, deflate',
+				'Accept-Encoding': 'gzip, deflate',
 				'Cache-Control': 'no-cache',
 				'Authorization': 'Bearer ' + Platform.Auth.Token
 			}
@@ -221,13 +223,14 @@ module.exports = function(RED)
 		Platform.debug('Fetching realtime data (backup path)...');
 
 		require('request')({
+			gzip: true,
 			method: 'POST',
 			url: Platform.BaseURI + 'ESS/GetLastPowerDataBySN',
 			headers: {
 				'Content-Type': 'application/json',
 				'Connection': 'keep-alive',
 				'Accept': '*/*',
-				//'Accept-Encoding': 'gzip, deflate',
+				'Accept-Encoding': 'gzip, deflate',
 				'Cache-Control': 'no-cache',
 				'Authorization': 'Bearer ' + Platform.Auth.Token
 			},
@@ -276,13 +279,14 @@ module.exports = function(RED)
 		Platform.debug('Fetching hourly statistics...');
 
 		require('request')({
+			gzip: true,
 			method: 'POST',
 			url: Platform.BaseURI + 'Power/SticsByDay',
 			headers: {
 				'Content-Type': 'application/json',
 				'Connection': 'keep-alive',
 				'Accept': '*/*',
-				//'Accept-Encoding': 'gzip, deflate',
+				'Accept-Encoding': 'gzip, deflate',
 				'Cache-Control': 'no-cache',
 				'Authorization': 'Bearer ' + Platform.Auth.Token
 			},
@@ -324,13 +328,14 @@ module.exports = function(RED)
 		Platform.debug('Fetching daily statistics...');
 
 		require('request')({
+			gzip: true,
 			method: 'POST',
 			url: Platform.BaseURI + 'Statistic/SystemStatistic',
 			headers: {
 				'Content-Type': 'application/json',
 				'Connection': 'keep-alive',
 				'Accept': '*/*',
-				//'Accept-Encoding': 'gzip, deflate',
+				'Accept-Encoding': 'gzip, deflate',
 				'Cache-Control': 'no-cache',
 				'Authorization': 'Bearer ' + Platform.Auth.Token
 			},
@@ -372,13 +377,14 @@ module.exports = function(RED)
 		Platform.debug('Fetching monthly statistics...');
 
 		require('request')({
+			gzip: true,
 			method: 'POST',
 			url: Platform.BaseURI + 'Statistic/SystemStatistic',
 			headers: {
 				'Content-Type': 'application/json',
 				'Connection': 'keep-alive',
 				'Accept': '*/*',
-				//'Accept-Encoding': 'gzip, deflate',
+				'Accept-Encoding': 'gzip, deflate',
 				'Cache-Control': 'no-cache',
 				'Authorization': 'Bearer ' + Platform.Auth.Token
 			},
