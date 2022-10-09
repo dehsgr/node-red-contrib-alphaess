@@ -115,7 +115,7 @@ module.exports = function(RED)
 				'Content-Type': 'application/json',
 				'Connection': 'keep-alive',
 				'Accept': '*/*',
-				'Accept-Encoding': 'gzip, deflate',
+				//'Accept-Encoding': 'gzip, deflate',
 				'Cache-Control': 'no-cache'
 			},
 			body: JSON.stringify(LoginData)
