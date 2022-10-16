@@ -15,8 +15,6 @@ module.exports = function(RED)
 		this.Serial = myNode.serial;
 		this.Username = myNode.username;
 		this.Password = myNode.password;
-		this.AuthSignature = myNode.authsignature;
-		this.AuthTimestamp = myNode.authtimestamp;
 		this.Interval = parseInt(myNode.interval);
 		this.UseBackupPath = myNode.usefetchbackup;
 		this.BaseURI = 'https://cloud.alphaess.com/api/';
@@ -73,6 +71,28 @@ module.exports = function(RED)
 
 	// ~~~ functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+	AlphaESS.prototype.GetHeaders = function (myAdditionalHeaders)
+	{
+		const crypto = require("crypto");
+
+		var headers = {
+			'Content-Type': 'application/json',
+			'Connection': 'keep-alive',
+			'Accept': '*/*',
+			'Accept-Encoding': 'gzip, deflate',
+			'Cache-Control': 'no-cache',
+			'AuthTimestamp': parseInt((new Date).getTime() / 1e3),
+			'AuthSignature': undefined
+		}
+
+		var data = 'LSZYDA95JVFQKV7PQNODZRDZIS4EDS0EED8BCWSS' + headers.AuthTimestamp;
+		var hash = crypto.createHash("sha512").update(data).digest('hex');
+
+		headers.AuthSignature = 'al8e4s' + hash + 'ui893ed';
+
+		return Object.assign({}, headers, myAdditionalHeaders);
+	}
+
 	AlphaESS.prototype.login = function()
 	{
 		var Platform = this;
@@ -112,15 +132,7 @@ module.exports = function(RED)
 				'Account/Login' :
 				'Account/RefreshToken'
 			),
-			headers: {
-				'Content-Type': 'application/json',
-				'Connection': 'keep-alive',
-				'Accept': '*/*',
-				'Accept-Encoding': 'gzip, deflate',
-				'Cache-Control': 'no-cache',
-				'AuthSignature': Platform.AuthSignature,
-				'AuthTimestamp': Platform.AuthTimestamp
-			},
+			headers: Platform.GetHeaders(),
 			body: JSON.stringify(LoginData)
 		}, function(myError, myResponse) {
 			if(myError)
@@ -170,16 +182,7 @@ module.exports = function(RED)
 			gzip: true,
 			method: 'GET',
 			url: Platform.BaseURI + 'ESS/GetSecondDataBySn?sys_sn=' + Platform.Serial + '&noLoading=true',
-			headers: {
-				'Content-Type': 'application/json',
-				'Connection': 'keep-alive',
-				'Accept': '*/*',
-				'Accept-Encoding': 'gzip, deflate',
-				'Cache-Control': 'no-cache',
-				'Authorization': 'Bearer ' + Platform.Auth.Token,
-				'AuthSignature': Platform.AuthSignature,
-				'AuthTimestamp': Platform.AuthTimestamp
-			}
+			headers: Platform.GetHeaders({ 'Authorization': 'Bearer ' + Platform.Auth.Token })
 		}, function(myError, myResponse) {
 			if(myError)
 			{
@@ -230,16 +233,7 @@ module.exports = function(RED)
 			gzip: true,
 			method: 'POST',
 			url: Platform.BaseURI + 'ESS/GetLastPowerDataBySN',
-			headers: {
-				'Content-Type': 'application/json',
-				'Connection': 'keep-alive',
-				'Accept': '*/*',
-				'Accept-Encoding': 'gzip, deflate',
-				'Cache-Control': 'no-cache',
-				'Authorization': 'Bearer ' + Platform.Auth.Token,
-				'AuthSignature': Platform.AuthSignature,
-				'AuthTimestamp': Platform.AuthTimestamp
-			},
+			headers: Platform.GetHeaders({ 'Authorization': 'Bearer ' + Platform.Auth.Token }),
 			body: JSON.stringify({
 				'sys_sn': Platform.Serial,
 				'noLoading': true,
@@ -288,16 +282,7 @@ module.exports = function(RED)
 			gzip: true,
 			method: 'POST',
 			url: Platform.BaseURI + 'Power/SticsByDay',
-			headers: {
-				'Content-Type': 'application/json',
-				'Connection': 'keep-alive',
-				'Accept': '*/*',
-				'Accept-Encoding': 'gzip, deflate',
-				'Cache-Control': 'no-cache',
-				'Authorization': 'Bearer ' + Platform.Auth.Token,
-				'AuthSignature': Platform.AuthSignature,
-				'AuthTimestamp': Platform.AuthTimestamp
-			},
+			headers: Platform.GetHeaders({ 'Authorization': 'Bearer ' + Platform.Auth.Token }),
 			body: JSON.stringify({
 				'szDay': Platform.Cache.Date,
 				'sDate': Platform.Cache.Date,
@@ -339,16 +324,7 @@ module.exports = function(RED)
 			gzip: true,
 			method: 'POST',
 			url: Platform.BaseURI + 'Statistic/SystemStatistic',
-			headers: {
-				'Content-Type': 'application/json',
-				'Connection': 'keep-alive',
-				'Accept': '*/*',
-				'Accept-Encoding': 'gzip, deflate',
-				'Cache-Control': 'no-cache',
-				'Authorization': 'Bearer ' + Platform.Auth.Token,
-				'AuthSignature': Platform.AuthSignature,
-				'AuthTimestamp': Platform.AuthTimestamp
-			},
+			headers: Platform.GetHeaders({ 'Authorization': 'Bearer ' + Platform.Auth.Token }),
 			body: JSON.stringify({
 				'statisticBy': 'month',
 				'sDate': Platform.Cache.Date,
@@ -390,16 +366,7 @@ module.exports = function(RED)
 			gzip: true,
 			method: 'POST',
 			url: Platform.BaseURI + 'Statistic/SystemStatistic',
-			headers: {
-				'Content-Type': 'application/json',
-				'Connection': 'keep-alive',
-				'Accept': '*/*',
-				'Accept-Encoding': 'gzip, deflate',
-				'Cache-Control': 'no-cache',
-				'Authorization': 'Bearer ' + Platform.Auth.Token,
-				'AuthSignature': Platform.AuthSignature,
-				'AuthTimestamp': Platform.AuthTimestamp
-			},
+			headers: Platform.GetHeaders({ 'Authorization': 'Bearer ' + Platform.Auth.Token }),
 			body: JSON.stringify({
 				'statisticBy': 'year',
 				'sDate': Platform.Cache.Date,

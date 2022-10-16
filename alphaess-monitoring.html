@@ -5,14 +5,6 @@
 			name: { value: ''},
 			username:  { value: '', required: true },
 			password:  { value: '', required: true },
-			authsignature:  { value: '', required: true },
-			authtimestamp:  {
-				value: '',
-				required: true,
-				validate: function (myValue) {
-                    return RED.validators.number(myValue);
-				}
-			},
 			serial: { value: '', required: true },
 			interval: {
 				value: '5',
@@ -47,14 +39,6 @@
 	<div class="form-row">
 		<label for="node-input-password"><i class="fa fa-tag"></i> Password</label>
 		<input type="password" id="node-input-password" placeholder="e.g. myspecialsecret">
-	</div>	
-	<div class="form-row">
-		<label for="node-input-authsignature"><i class="fa fa-tag"></i> Auth Signature</label>
-		<input type="text" id="node-input-authsignature" placeholder="">
-	</div>	
-	<div class="form-row">
-		<label for="node-input-authtimestamp"><i class="fa fa-tag"></i> Auth Timestamp</label>
-		<input type="text" id="node-input-authtimestamp" placeholder="">
 	</div>	
 	<div class="form-row">
 		<label for="node-input-serial"><i class="fa fa-tag"></i> System Serial</label>
