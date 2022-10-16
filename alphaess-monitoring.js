@@ -1,5 +1,3 @@
-// ~~~ constants ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 module.exports = function(RED)
 {
 	'use strict';
@@ -17,6 +15,8 @@ module.exports = function(RED)
 		this.Serial = myNode.serial;
 		this.Username = myNode.username;
 		this.Password = myNode.password;
+		this.AuthSignature = myNode.authsignature;
+		this.AuthTimestamp = myNode.authtimestamp;
 		this.Interval = parseInt(myNode.interval);
 		this.UseBackupPath = myNode.usefetchbackup;
 		this.BaseURI = 'https://cloud.alphaess.com/api/';
@@ -117,7 +117,9 @@ module.exports = function(RED)
 				'Connection': 'keep-alive',
 				'Accept': '*/*',
 				'Accept-Encoding': 'gzip, deflate',
-				'Cache-Control': 'no-cache'
+				'Cache-Control': 'no-cache',
+				'AuthSignature': Platform.AuthSignature,
+				'AuthTimestamp': Platform.AuthTimestamp
 			},
 			body: JSON.stringify(LoginData)
 		}, function(myError, myResponse) {
@@ -174,7 +176,9 @@ module.exports = function(RED)
 				'Accept': '*/*',
 				'Accept-Encoding': 'gzip, deflate',
 				'Cache-Control': 'no-cache',
-				'Authorization': 'Bearer ' + Platform.Auth.Token
+				'Authorization': 'Bearer ' + Platform.Auth.Token,
+				'AuthSignature': Platform.AuthSignature,
+				'AuthTimestamp': Platform.AuthTimestamp
 			}
 		}, function(myError, myResponse) {
 			if(myError)
@@ -232,7 +236,9 @@ module.exports = function(RED)
 				'Accept': '*/*',
 				'Accept-Encoding': 'gzip, deflate',
 				'Cache-Control': 'no-cache',
-				'Authorization': 'Bearer ' + Platform.Auth.Token
+				'Authorization': 'Bearer ' + Platform.Auth.Token,
+				'AuthSignature': Platform.AuthSignature,
+				'AuthTimestamp': Platform.AuthTimestamp
 			},
 			body: JSON.stringify({
 				'sys_sn': Platform.Serial,
@@ -288,7 +294,9 @@ module.exports = function(RED)
 				'Accept': '*/*',
 				'Accept-Encoding': 'gzip, deflate',
 				'Cache-Control': 'no-cache',
-				'Authorization': 'Bearer ' + Platform.Auth.Token
+				'Authorization': 'Bearer ' + Platform.Auth.Token,
+				'AuthSignature': Platform.AuthSignature,
+				'AuthTimestamp': Platform.AuthTimestamp
 			},
 			body: JSON.stringify({
 				'szDay': Platform.Cache.Date,
@@ -337,7 +345,9 @@ module.exports = function(RED)
 				'Accept': '*/*',
 				'Accept-Encoding': 'gzip, deflate',
 				'Cache-Control': 'no-cache',
-				'Authorization': 'Bearer ' + Platform.Auth.Token
+				'Authorization': 'Bearer ' + Platform.Auth.Token,
+				'AuthSignature': Platform.AuthSignature,
+				'AuthTimestamp': Platform.AuthTimestamp
 			},
 			body: JSON.stringify({
 				'statisticBy': 'month',
@@ -386,7 +396,9 @@ module.exports = function(RED)
 				'Accept': '*/*',
 				'Accept-Encoding': 'gzip, deflate',
 				'Cache-Control': 'no-cache',
-				'Authorization': 'Bearer ' + Platform.Auth.Token
+				'Authorization': 'Bearer ' + Platform.Auth.Token,
+				'AuthSignature': Platform.AuthSignature,
+				'AuthTimestamp': Platform.AuthTimestamp
 			},
 			body: JSON.stringify({
 				'statisticBy': 'year',
