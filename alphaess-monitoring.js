@@ -231,8 +231,8 @@ module.exports = function(RED)
 
 		require('request')({
 			gzip: true,
-			method: 'POST',
-			url: Platform.BaseURI + 'ESS/GetLastPowerDataBySN',
+			method: 'GET',
+			url: Platform.BaseURI + 'ESS/GetLastPowerDataBySN?sys_sn=' + Platform.Serial + '&noLoading=true',
 			headers: Platform.GetHeaders({ 'Authorization': 'Bearer ' + Platform.Auth.Token }),
 			body: JSON.stringify({
 				'sys_sn': Platform.Serial,
