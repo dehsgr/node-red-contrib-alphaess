@@ -12,6 +12,7 @@ module.exports = function(RED)
 		var Loop;
 	
 		this.Auth = undefined;
+		this.SignatureKey = undefined;
 		this.Serial = myNode.serial;
 		this.Username = myNode.username;
 		this.Password = myNode.password;
@@ -44,7 +45,13 @@ module.exports = function(RED)
 
 		function monitor()
 		{
-			Platform.login();
+			if (!Platform.SignatureKey) {
+				Platform.prepare();
+			}
+			else
+			{
+				Platform.login();
+			}
 			Platform.fetchRealtime();
 		}
 
@@ -71,10 +78,77 @@ module.exports = function(RED)
 
 	// ~~~ functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+	AlphaESS.prototype.prepare = function ()
+	{
+		const APP_SRC = /\<script src\=(\/static\/js\/app\..*?\.js\?.*?)\>/gis;
+		const APP_KEY = /"(LS.*?CWSS)"/gis;
+
+		var Platform = this;
+
+		require('request')({
+			gzip: true,
+			method: 'GET',
+			url: Platform.BaseURI + '../',
+		}, function(myError, myResponse) {
+			if(myError)
+			{
+				Platform.warn('There was an error during fetching Alpha ESS Application Source: ' + myError);
+			}
+			else
+			{
+				try {
+					var body = myResponse.body;
+					var js = APP_SRC.exec(body);
+					if (!js || js.length < 2) {
+						throw 'We got an unexpected body.';
+					}
+
+					js = js[1];
+
+					Platform.debug('We got the following Application Source: ' + js);
+
+					require('request')({
+						gzip: true,
+						method: 'GET',
+						url: Platform.BaseURI + '..' + js,
+					}, function(myError, myResponse) {
+						if(myError)
+						{
+							Platform.warn('There was an error during fetching Alpha ESS Signature Key: ' + myError);
+						}
+						else
+						{
+							try {
+								var body = myResponse.body;
+								var key = APP_KEY.exec(body);
+								if (!key || key.length < 2) {
+									throw 'We got an unexpected body.';
+								}
+			
+								Platform.SignatureKey = key[1];
+			
+								Platform.debug('We got the following Application Signature Key: ' + Platform.SignatureKey);
+							}
+							catch(myError)
+							{
+								Platform.warn('There was an error during fetching Alpha ESS Signature Key: ' + myError + '\r\n\r\nWe got the following body:\r\n' + myResponse.body);
+							}
+						}
+					});
+				}
+				catch(myError)
+				{
+					Platform.warn('There was an error during fetching Alpha ESS Application Source: ' + myError + '\r\n\r\nWe got the following body:\r\n' + myResponse.body);
+				}
+			}
+		});
+	}
+
 	AlphaESS.prototype.GetHeaders = function (myAdditionalHeaders)
 	{
 		const crypto = require("crypto");
 
+		var Platform = this;
 		var headers = {
 			'Content-Type': 'application/json',
 			'Connection': 'keep-alive',
@@ -85,7 +159,7 @@ module.exports = function(RED)
 			'AuthSignature': undefined
 		}
 
-		var data = 'LS885ZYDA95JVFQKUIUUUV7PQNODZRDZIS4ERREDS0EED8BCWSS' + headers.AuthTimestamp;
+		var data = Platform.SignatureKey + headers.AuthTimestamp;
 		var hash = crypto.createHash("sha512").update(data).digest('hex');
 
 		headers.AuthSignature = 'al8e4s' + hash + 'ui893ed';
