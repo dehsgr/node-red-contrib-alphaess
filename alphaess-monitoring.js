@@ -43,15 +43,11 @@ module.exports = function(RED)
 			return now.getFullYear() + '-' + (now.getMonth() + 1) + '-' + now.getDate();
 		}});
 
+		Platform.initialize();
+
 		function monitor()
 		{
-			if (!Platform.SignatureKey) {
-				Platform.prepare();
-			}
-			else
-			{
-				Platform.login();
-			}
+			Platform.authenticate();
 			Platform.fetchRealtime();
 		}
 
@@ -78,12 +74,37 @@ module.exports = function(RED)
 
 	// ~~~ functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-	AlphaESS.prototype.prepare = function ()
+	AlphaESS.prototype.GetHeaders = function (myAdditionalHeaders)
+	{
+		const crypto = require("crypto");
+
+		var Platform = this;
+		var headers = {
+			'Content-Type': 'application/json',
+			'Connection': 'keep-alive',
+			'Accept': '*/*',
+			'Accept-Encoding': 'gzip, deflate',
+			'Cache-Control': 'no-cache',
+			'AuthTimestamp': parseInt((new Date).getTime() / 1e3),
+			'AuthSignature': undefined
+		}
+
+		var data = Platform.SignatureKey + headers.AuthTimestamp;
+		var hash = crypto.createHash("sha512").update(data).digest('hex');
+
+		headers.AuthSignature = 'al8e4s' + hash + 'ui893ed';
+
+		return Object.assign({}, headers, myAdditionalHeaders);
+	}
+
+	AlphaESS.prototype.initialize = function ()
 	{
 		const APP_SRC = /\<script src\=(\/static\/js\/app\..*?\.js\?.*?)\>/gis;
 		const APP_KEY = /"(LS.*?CWSS)"/gis;
 
 		var Platform = this;
+
+		Platform.log('Initializing...');
 
 		require('request')({
 			gzip: true,
@@ -144,36 +165,18 @@ module.exports = function(RED)
 		});
 	}
 
-	AlphaESS.prototype.GetHeaders = function (myAdditionalHeaders)
-	{
-		const crypto = require("crypto");
-
-		var Platform = this;
-		var headers = {
-			'Content-Type': 'application/json',
-			'Connection': 'keep-alive',
-			'Accept': '*/*',
-			'Accept-Encoding': 'gzip, deflate',
-			'Cache-Control': 'no-cache',
-			'AuthTimestamp': parseInt((new Date).getTime() / 1e3),
-			'AuthSignature': undefined
-		}
-
-		var data = Platform.SignatureKey + headers.AuthTimestamp;
-		var hash = crypto.createHash("sha512").update(data).digest('hex');
-
-		headers.AuthSignature = 'al8e4s' + hash + 'ui893ed';
-
-		return Object.assign({}, headers, myAdditionalHeaders);
-	}
-
-	AlphaESS.prototype.login = function()
+	AlphaESS.prototype.authenticate = function()
 	{
 		var Platform = this;
 		var LoginData = {
 			'username': Platform.Username,
 			'password': Platform.Password
 		};
+
+		if (!Platform.SignatureKey)
+		{
+			return;
+		}
 
 		if (Platform.Auth &&
 			Platform.Auth.Token &&
@@ -211,7 +214,7 @@ module.exports = function(RED)
 		}, function(myError, myResponse) {
 			if(myError)
 			{
-				Platform.warn('There was an error during login operation into Alpha ESS monitoring portal: ' + myError);
+				Platform.warn('There was an error during authentication at Alpha ESS monitoring portal: ' + myError);
 			}
 			else
 			{
@@ -235,7 +238,7 @@ module.exports = function(RED)
 				}
 				catch(myError)
 				{
-					Platform.warn('There was an error during login operation into Alpha ESS monitoring portal: ' + myError + '\r\n\r\nWe got the following unprocessable body:\r\n' + myResponse.body);
+					Platform.warn('There was an error during authentication at Alpha ESS monitoring portal: ' + myError + '\r\n\r\nWe got the following unprocessable body:\r\n' + myResponse.body);
 				}
 			}
 		});
