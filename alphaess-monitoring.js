@@ -17,7 +17,7 @@ module.exports = function(RED)
 		this.Username = myNode.username;
 		this.Password = myNode.password;
 		this.Interval = parseInt(myNode.interval);
-		this.UseBackupPath = myNode.usefetchbackup;
+		this.Interval = this.Interval >= 10 ? this.Interval : 10;		// increasing smaller inervals according hints of Alpha ESS. Thanks @ElevenFan.
 		this.BaseURI = 'https://cloud.alphaess.com/api/';
 		this.Cache = {
 			'Hourly' : {
@@ -254,57 +254,6 @@ module.exports = function(RED)
 		}
 		
 		Platform.debug('Fetching realtime data...');
-
-		require('request')({
-			gzip: true,
-			method: 'GET',
-			url: Platform.BaseURI + 'ESS/GetSecondDataBySn?sys_sn=' + Platform.Serial + '&noLoading=true',
-			headers: Platform.GetHeaders({ 'Authorization': 'Bearer ' + Platform.Auth.Token })
-		}, function(myError, myResponse) {
-			if(myError)
-			{
-				Platform.warn('There was an error fetching realtime data for ' + Platform.Serial + ': ' + myError);
-			}
-			else
-			{
-				try {
-					var body = JSON.parse(myResponse.body);
-				}
-				catch(myError)
-				{
-					body = { data: null	};
-				}
-
-				if (body.data === null) {
-					if (Platform.UseBackupPath) {
-						Platform.warn('There was an error fetching realtime data for ' + Platform.Serial + '. Switching over to backup path for requesting data...');
-						AlphaESS.prototype.fetchRealtime = AlphaESS.prototype.fetchRealtimeBackupPath;
-						return;
-					} else {
-						Platform.warn('There was an error fetching realtime data for ' + Platform.Serial + ': Malformed or empty response!');
-						body.data = {
-							pmeter_l1: 0, pmeter_l2: 0, pmeter_l3: 0, pmeter_dc: 0,
-							ppv1: 0, ppv2: 0, ppv3: 0, ppv4: 0,
-							pbat: 0
-						}
-					}
-				}
-
-				Platform.processData(body);
-			}
-		});
-	}
-
-	AlphaESS.prototype.fetchRealtimeBackupPath = function()
-	{
-		var Platform = this;
-
-		if (!Platform.Auth || !Platform.Auth.Token)
-		{
-			return;
-		}
-		
-		Platform.debug('Fetching realtime data (backup path)...');
 
 		require('request')({
 			gzip: true,
