@@ -17,7 +17,6 @@ module.exports = function(RED)
 		this.Username = myNode.username;
 		this.Password = myNode.password;
 		this.Interval = parseInt(myNode.interval);
-		this.Interval = this.Interval >= 10 ? this.Interval : 10;		// increasing smaller inervals according hints of Alpha ESS. Thanks @ElevenFan.
 		this.BaseURI = 'https://cloud.alphaess.com/api/';
 		this.Cache = {
 			'Hourly' : {
