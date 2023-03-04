@@ -354,7 +354,7 @@ module.exports = function(RED)
 		Platform.debug('Processing data...');
 
 		// let's fetch hourly statistics every 10 minutes...
-		if (Date.now() > Platform.Cache.Daily.LastQuery + (1000 * 60 * 10)) {
+		if (Date.now() > Platform.Cache.Hourly.LastQuery + (1000 * 60 * 10)) {
 			Platform.fetchHourlyStatistics();
 		}
 
@@ -364,7 +364,7 @@ module.exports = function(RED)
 		}
 
 		// let's fetch monthly statistics every hour...
-		if (Date.now() > Platform.Cache.Daily.LastQuery + (1000 * 60 * 60)) {
+		if (Date.now() > Platform.Cache.Monthly.LastQuery + (1000 * 60 * 60)) {
 			Platform.fetchMonthlyStatistics();
 		}
 
