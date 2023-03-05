@@ -22,6 +22,6 @@ You might switch over this node to manual mode. This will provide you to perform
 
 <table>
 <tr><th>YOURMETHOD</th><td>You might use GET or POST here for fetching from or configuring your system.</td></tr>
-<tr><th>YOURCOMMAND</th><td>You might use here each API call requiring a specific system serial and is listed within [Alpha ESS Open API Documentation](https://open.alphaess.com/).</td></tr>
+<tr><th>YOURCOMMAND</th><td>You might use here each API call requiring a specific system serial and is listed within <a href="https://open.alphaess.com/">Alpha ESS Open API Documentation</a>.</td></tr>
 <tr><th>YOURPAYLOAD</th><td>The payload depends on the command used. If there isn't a requested parameter, leave blank. If there is a date parameter, provide it in format YYYY-MM-DD. If command requires JSON data, provide it.</td></tr>
 </table>
