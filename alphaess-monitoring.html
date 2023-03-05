@@ -15,7 +15,7 @@
 				}
 			}
 		},
-		inputs: 0,				// set the number of inputs - only 0 or 1
+		inputs: 1,				// set the number of inputs - only 0 or 1
 		outputs: 1,				// set the number of outputs - 0 to n
 		icon: "icon.png",		// saved in  icons/myicon.png
 		color: "#757c8a", 
@@ -43,23 +43,15 @@
 			});
 
 			$('#node-input-mode').change(() => {
-				_self.mode = parseInt($('#node-input-mode').find(":selected").val());
-				$('#div-input-interval').toggle();
+				if (parseInt($('#node-input-mode').find(":selected").val()) !== 0)
+				{
+					$('#div-input-interval').hide();
+				}
+				else
+				{
+					$('#div-input-interval').show();
+				}
 			});
-
-			$('#node-input-mode option[value="' + _self.mode + '"]').attr('selected', 'selected');
-			if (parseInt(_self.Mode) !== 0)
-			{
-				$('#div-input-interval').hide();
-			}
-
-			_self.inputs = parseInt(_self.mode);
-		}, 
-		oneditsave: function() {
-			const _self = this;
-
-			_self.mode = $('#node-input-mode').find(":selected").val();
-			_self.inputs = parseInt(_self.mode);
 		}
 	});
 </script>

@@ -26,10 +26,6 @@ module.exports = function(RED)
 		this.Mode = parseInt(myNode.mode);
 		this.Interval = parseInt(myNode.interval);
 		this.Cache = {
-			'Hourly' : {
-				'LastQuery': 0,
-				'Statistics': undefined
-			},
 			'Daily' : {
 				'LastQuery': 0,
 				'Statistics': undefined
@@ -38,19 +34,20 @@ module.exports = function(RED)
 				'LastQuery': 0,
 				'Statistics': undefined
 			},
+			'Yearly' : {
+				'LastQuery': 0,
+				'Statistics': undefined
+			},
 		};
-
-		Object.defineProperty(this.Cache, "Index", { get: function () { 
-			return new Date().getDate() - 1;
-		}});
-
-		Object.defineProperty(this.Cache, "Date", { get: function () { 
-			var now = new Date();
-			return now.getFullYear() + '-' + (now.getMonth() + 1) + '-' + now.getDate();
-		}});
 
 		this.on('input', async function (msg)
 		{
+			if (!this.Mode)
+			{
+				Platform.warn ('For being able to use input, you must switch over to manual mode.');
+				return;
+			}
+
 			switch (msg.topic) {
 				case 'POST':
 					if (!msg.command || !msg.payload) 
@@ -96,13 +93,6 @@ module.exports = function(RED)
 				return;
 			}
 
-			// let's cache hourly statistics every 10 minutes...
-			if (Date.now() > Platform.Cache.Hourly.LastQuery + (1000 * 60 * 10)) {
-				//TBD
-
-				Platform.Cache.Hourly.LastQuery = Date.now();
-			}
-
 			// let's cache daily statistics every 10 minutes...
 			if (Date.now() > Platform.Cache.Daily.LastQuery + (1000 * 60 * 10)) {
 				var r = await API.FetchTodaysData(Platform.Serial, Platform.AppID, Platform.AppSecret, Platform);
@@ -124,6 +114,13 @@ module.exports = function(RED)
 				//TBD
 
 				Platform.Cache.Monthly.LastQuery = Date.now();
+			}
+
+			// let's cache yearly statistics every 1 days...
+			if (Date.now() > Platform.Cache.Yearly.LastQuery + (1000 * 60 * 60 * 24)) {
+				//TBD
+
+				Platform.Cache.Yearly.LastQuery = Date.now();
 			}
 
 			var r = await API.FetchRealTimeData(Platform.Serial, Platform.AppID, Platform.AppSecret, Platform);
@@ -179,36 +176,38 @@ module.exports = function(RED)
 		Platform.debug('Processing data...');
 
 		Platform.send({ 
-			'code': myData.code,
-			'info': myData.info,
 			'payload': {
-				'consumption':	myData.ppv + myData.pbat + myData.pgrid,
-				'grid':			myData.pgrid,
-				'modules':		myData.ppv,
+				'consumption':			+(myData.ppv + myData.pbat + myData.pgrid).toFixed(2),
+				'grid':					+(myData.pgrid).toFixed(2),
+				'modules':				+(myData.ppv).toFixed(2),
 				'battery': {
-					'soc': myData.soc,
-					'load': myData.pbat
+					'soc':				+(myData.soc).toFixed(2),
+					'load': 			+(myData.pbat).toFixed(2)
 				},
 				'today': {
 					'consumption':
-						Platform.Cache.Daily.Statistics.eDischarge + Platform.Cache.Daily.Statistics.eChargingPile,
+						+(
+										Platform.Cache.Daily.Statistics.eInput +
+										Platform.Cache.Daily.Statistics.epv -
+										Platform.Cache.Daily.Statistics.eOutput -
+										Platform.Cache.Daily.Statistics.eGirdCharge
+						).toFixed(2),
 					'grid': {
-						'supply': Platform.Cache.Daily.Statistics.eOutput,
-						'purchase': Platform.Cache.Daily.Statistics.eInput
+						'supply':		+(Platform.Cache.Daily.Statistics.eOutput).toFixed(2),
+						'purchase':		+(Platform.Cache.Daily.Statistics.eInput).toFixed(2)
 					},
-					'modules':
-						Platform.Cache.Daily.Statistics.epv,
+					'modules':			+(Platform.Cache.Daily.Statistics.epv).toFixed(2),
 					'battery': {
-						'charge': Platform.Cache.Daily.Statistics.eCharge,
-						'discharge': Platform.Cache.Daily.Statistics.eDischarge
+						'charge': 		+(Platform.Cache.Daily.Statistics.eCharge).toFixed(2),
+						'discharge':	+(Platform.Cache.Daily.Statistics.eDischarge).toFixed(2)
 					}
 				},
 				'rawdata': {
 					'realtime': myData,
 					'statistics': {
-						'hourly': Platform.Cache.Hourly.Statistics,
-						'daily': Platform.Cache.Daily.Statistics,
-						'monthly': Platform.Cache.Monthly.Statistics
+						'daily': 		Platform.Cache.Daily.Statistics,
+						'monthly': 		Platform.Cache.Monthly.Statistics,
+						'yearly': 		Platform.Cache.Yearly.Statistics
 					}
 				}
 			}
