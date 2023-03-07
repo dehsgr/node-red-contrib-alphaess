@@ -26,6 +26,10 @@ module.exports = function(RED)
 		this.Mode = parseInt(myNode.mode);
 		this.Interval = parseInt(myNode.interval);
 		this.Cache = {
+			'Hourly' : {
+				'LastQuery': 0,
+				'Statistics': undefined
+			},
 			'Daily' : {
 				'LastQuery': 0,
 				'Statistics': undefined
@@ -93,6 +97,33 @@ module.exports = function(RED)
 				return;
 			}
 
+			// let's cache hourly statistics every 10 minutes...
+			if (Date.now() > Platform.Cache.Monthly.LastQuery + (1000 * 60 * 10)) {
+				Platform.Cache.Hourly.Statistics = await API.FetchHourlyData(Platform.Serial, Platform.AppID, Platform.AppSecret, Platform);
+				if (!Platform.Cache.Hourly.Statistics)
+				{
+					return;
+				}
+
+				Platform.Cache.Hourly.Statistics = Platform.Cache.Hourly.Statistics.sort(
+					function(a, b) {
+						if (a.uploadTime < b.uploadTime)
+						{
+							return -1;
+						}
+
+						if (a.uploadTime > b.uploadTime)
+						{
+							return 1;
+						}
+
+						return 0;
+					}
+				);
+
+				Platform.Cache.Hourly.LastQuery = Date.now();
+			}
+
 			// let's cache daily statistics every 10 minutes...
 			if (Date.now() > Platform.Cache.Daily.LastQuery + (1000 * 60 * 10)) {
 				var r = await API.FetchTodaysData(Platform.Serial, Platform.AppID, Platform.AppSecret, Platform);
@@ -109,7 +140,7 @@ module.exports = function(RED)
 				Platform.Cache.Daily.LastQuery = Date.now();
 			}
 
-			// let's cahce monthly statistics every hour...
+			// let's cache monthly statistics every hour...
 			if (Date.now() > Platform.Cache.Monthly.LastQuery + (1000 * 60 * 60)) {
 				//TBD
 
@@ -205,6 +236,7 @@ module.exports = function(RED)
 				'rawdata': {
 					'realtime': myData,
 					'statistics': {
+						'hourly': 		Platform.Cache.Hourly.Statistics,
 						'daily': 		Platform.Cache.Daily.Statistics,
 						'monthly': 		Platform.Cache.Monthly.Statistics,
 						'yearly': 		Platform.Cache.Yearly.Statistics

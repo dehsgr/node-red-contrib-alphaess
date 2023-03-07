@@ -17,6 +17,7 @@ module.exports = {
 		GET : {
 			SystemList : 'getEssList',
 			Realtime : 'getLastPowerData',
+			Hourly : 'getOneDayPowerBySn',
 			Today : 'getOneDateEnergyBySn'
 		},
 		POST : {
@@ -50,6 +51,15 @@ module.exports = {
 		myLogger.trace('Fetching realtime data...');
 		return await this.GetData(this.API.GET.Realtime, mySN, undefined, myAppID, myAppSecret, myLogger);
 	}, 
+
+	FetchHourlyData : async function(mySN, myAppID, myAppSecret, myLogger)
+	{
+		myLogger.trace('Fetching hourly data...');
+		
+		var today = new Date().toISOString().slice(0, 10);
+		
+		return await this.GetData(this.API.GET.Hourly, mySN, today, myAppID, myAppSecret, myLogger);
+	},
 
 	FetchTodaysData : async function(mySN, myAppID, myAppSecret, myLogger)
 	{
