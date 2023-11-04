@@ -17,7 +17,7 @@ module.exports = function(RED)
 		this.Username = myNode.username;
 		this.Password = myNode.password;
 		this.Interval = parseInt(myNode.interval);
-		this.BaseURI = 'https://cloud.alphaess.com/api/';
+		this.BaseURI = 'https://www.alphaess-cloud.com/api/';
 		this.Cache = {
 			'Hourly' : {
 				'LastQuery': 0,
