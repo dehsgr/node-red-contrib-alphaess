@@ -2,10 +2,11 @@
 	RED.nodes.registerType('alphaess-monitoring', {
 		category: 'Alpha ESS',
 		defaults: {	
-			name: { value: ''},
-			username:  { value: '', required: true },
-			password:  { value: '', required: true },
-			serial: { value: '', required: true },
+			name:		{ value: '' },
+			appid:		{ value: '', required: true },
+			appsecret:	{ value: '', required: true },
+			serial:		{ value: '' },
+			mode:		{ value: '0', required: true },
 			interval: {
 				value: '10',
 				required: true,
@@ -14,36 +15,79 @@
 				}
 			}
 		},
-		inputs: 0,			// set the number of inputs - only 0 or 1
-		outputs: 1,			// set the number of outputs - 0 to n
+		inputs: 1,				// set the number of inputs - only 0 or 1
+		outputs: 1,				// set the number of outputs - 0 to n
 		icon: "icon.png",		// saved in  icons/myicon.png
 		color: "#757c8a", 
 		label: function() {
 			return this.name || "Alpha ESS Monitoring";
 		},
-		paletteLabel: "Monitoring"
+		paletteLabel: "Monitoring",
+		oneditprepare: function() {
+			const _self = this;
+
+			$.getJSON('systems', function(mySystems)
+			{
+				if (!mySystems || mySystems.length === 0)
+				{
+					$('#div-input-serial').hide();
+					$('#div-input-mode').hide();
+					$('#div-input-interval').hide();
+				}
+
+				for (var i = 0; i < mySystems.length; i++)
+				{
+					var s = mySystems[i];
+					$('#node-input-serial').append('<option value="' + s.sysSn + '"' + (_self.serial === s.sysSn ? ' selected' : '') + '>' + s.sysSn + ' (' + s.minv + ')</option>');
+				}
+			});
+
+			$('#node-input-mode').change(() => {
+				if (parseInt($('#node-input-mode').find(":selected").val()) !== 0)
+				{
+					$('#div-input-interval').hide();
+				}
+				else
+				{
+					$('#div-input-interval').show();
+				}
+			});
+		}
 	});
 </script>
 
 <!-- Setting design and inputs for node -->
 <script type="text/x-red" data-template-name="alphaess-monitoring">
+	<style>
+		.form-row select {
+			width: 70%;
+		}
+	</style>
+
 	<div class="form-row">
 		<label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
 		<input type="text" id="node-input-name" placeholder="e.g. Alpha ESS Monitoring">
 	</div>	
 	<div class="form-row">
-		<label for="node-input-username"><i class="fa fa-tag"></i> Username</label>
-		<input type="text" id="node-input-username" placeholder="e.g. myalphaessuserid">
+		<label for="node-input-appid"><i class="fa fa-tag"></i> App ID</label>
+		<input type="text" id="node-input-appid" placeholder="Retrieve at https://open.alphaess.com/">
 	</div>	
 	<div class="form-row">
-		<label for="node-input-password"><i class="fa fa-tag"></i> Password</label>
-		<input type="password" id="node-input-password" placeholder="e.g. myspecialsecret">
+		<label for="node-input-appsecret"><i class="fa fa-tag"></i> Secret</label>
+		<input type="password" id="node-input-appsecret" placeholder="Retrieve at https://open.alphaess.com/">
 	</div>	
-	<div class="form-row">
-		<label for="node-input-serial"><i class="fa fa-tag"></i> System Serial</label>
-		<input type="text" id="node-input-serial" placeholder="e.g. ABCDEF012345678">
-	</div>	
-	<div class="form-row">
+	<div id="div-input-serial" class="form-row">
+		<label for="node-input-serial"><i class="fa fa-tag"></i> Serial</label>
+		<select id="node-input-serial"></select>
+	</div>
+	<div id="div-input-mode" class="form-row">
+		<label for="node-input-mode"><i class="fa fa-tag"></i> Mode</label>
+		<select id="node-input-mode">
+			<option value="0">Automatic (Periodically)</option>
+			<option value="1">Manual (Fetching/Configuring)</option>
+		</select>
+	</div>
+	<div id="div-input-interval" class="form-row">
 		<label for="node-input-interval"><i class="fa fa-tag"></i> Interval</label>
 		<input type="text" id="node-input-interval" placeholder="10 is the minimum value!">
 	</div>	
