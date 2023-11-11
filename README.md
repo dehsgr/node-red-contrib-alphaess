@@ -9,6 +9,8 @@ Additionally Alpha ESS Monitoring polls statistical data on startup and within s
 
 All data are merged together into one payload.
 
+Before using this node you've to register at [Alpha ESS Open API](https://open.alphaess.com/).
+
 ### Manual Mode
 You might switch over this node to manual mode. This will provide you to perform queries against Alpha ESS Monitoring via [Alpha ESS Open API](https://open.alphaess.com/). Further you will have the possibility of configuring your system via that API. You can use node's input then with the following message syntax:
 
