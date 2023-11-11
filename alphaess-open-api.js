@@ -24,7 +24,7 @@ module.exports = {
 
 		},
 		ERROR : {
-			0000 : 'Generic error',
+			0x0  : 'Generic error',
 			6001 : 'Parameter error',
 			6002 : 'The SN is not bound to the user',
 			6003 : 'You have bound this SN',

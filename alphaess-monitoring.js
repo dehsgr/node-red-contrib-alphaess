@@ -221,7 +221,7 @@ module.exports = function(RED)
 										Platform.Cache.Daily.Statistics.eInput +
 										Platform.Cache.Daily.Statistics.epv -
 										Platform.Cache.Daily.Statistics.eOutput -
-										Platform.Cache.Daily.Statistics.eGirdCharge
+										Platform.Cache.Daily.Statistics.eGridCharge
 						).toFixed(2),
 					'grid': {
 						'supply':		+(Platform.Cache.Daily.Statistics.eOutput).toFixed(2),
@@ -238,8 +238,10 @@ module.exports = function(RED)
 					'statistics': {
 						'hourly': 		Platform.Cache.Hourly.Statistics,
 						'daily': 		Platform.Cache.Daily.Statistics,
+						/*
 						'monthly': 		Platform.Cache.Monthly.Statistics,
 						'yearly': 		Platform.Cache.Yearly.Statistics
+						*/
 					}
 				}
 			}
