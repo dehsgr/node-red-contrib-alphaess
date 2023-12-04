@@ -208,12 +208,12 @@ module.exports = function(RED)
 
 		Platform.send({ 
 			'payload': {
-				'consumption':			+(myData.ppv + myData.pbat + myData.pgrid).toFixed(2),
-				'grid':					+(myData.pgrid).toFixed(2),
-				'modules':				+(myData.ppv).toFixed(2),
+				'consumption':			+((myData.ppv || 0)+ (myData.pbat || 0) + (myData.pgrid || 0)).toFixed(2),
+				'grid':					+(myData.pgrid || 0).toFixed(2),
+				'modules':				+(myData.ppv || 0).toFixed(2),
 				'battery': {
-					'soc':				+(myData.soc).toFixed(2),
-					'load': 			+(myData.pbat).toFixed(2)
+					'soc':				+(myData.soc || 0).toFixed(2),
+					'load': 			+(myData.pbat || 0).toFixed(2)
 				},
 				'today': {
 					'consumption':
