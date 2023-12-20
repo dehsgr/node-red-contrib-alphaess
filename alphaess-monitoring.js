@@ -218,19 +218,19 @@ module.exports = function(RED)
 				'today': {
 					'consumption':
 						+(
-										Platform.Cache.Daily.Statistics.eInput +
-										Platform.Cache.Daily.Statistics.epv -
-										Platform.Cache.Daily.Statistics.eOutput -
-										Platform.Cache.Daily.Statistics.eGridCharge
+										(Platform.Cache.Daily.Statistics.eInput || 0) +
+										(Platform.Cache.Daily.Statistics.epv || 0) -
+										(Platform.Cache.Daily.Statistics.eOutput || 0) -
+										(Platform.Cache.Daily.Statistics.eGridCharge || 0)
 						).toFixed(2),
 					'grid': {
-						'supply':		+(Platform.Cache.Daily.Statistics.eOutput).toFixed(2),
-						'purchase':		+(Platform.Cache.Daily.Statistics.eInput).toFixed(2)
+						'supply':		+(Platform.Cache.Daily.Statistics.eOutput || 0).toFixed(2),
+						'purchase':		+(Platform.Cache.Daily.Statistics.eInput || 0).toFixed(2)
 					},
-					'modules':			+(Platform.Cache.Daily.Statistics.epv).toFixed(2),
+					'modules':			+(Platform.Cache.Daily.Statistics.epv || 0).toFixed(2),
 					'battery': {
-						'charge': 		+(Platform.Cache.Daily.Statistics.eCharge).toFixed(2),
-						'discharge':	+(Platform.Cache.Daily.Statistics.eDischarge).toFixed(2)
+						'charge': 		+(Platform.Cache.Daily.Statistics.eCharge || 0).toFixed(2),
+						'discharge':	+(Platform.Cache.Daily.Statistics.eDischarge || 0).toFixed(2)
 					}
 				},
 				'rawdata': {
